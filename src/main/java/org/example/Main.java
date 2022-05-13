@@ -11,7 +11,7 @@ public class Main {
         builder.setSpout("spout", new BookSpout());
         builder.setBolt("split", new SplitBolt()).shuffleGrouping("spout");
         builder.setBolt("count", new CountBolt()).shuffleGrouping("split");
-
+        builder.setBolt("sink", new FileSink()).shuffleGrouping("count");
         Config conf = new Config();
         //conf.setDebug(true);
 
@@ -19,7 +19,7 @@ public class Main {
         try {
             cluster = new LocalCluster();
             cluster.submitTopology("word-count", conf, builder.createTopology());
-            Thread.sleep(300000);
+            Thread.sleep(30000);
         } catch (TException e) {
             throw new RuntimeException(e);
         } catch (InterruptedException e) {

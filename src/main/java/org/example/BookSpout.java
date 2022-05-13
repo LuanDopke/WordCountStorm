@@ -16,7 +16,7 @@ import java.util.Scanner;
 public class BookSpout extends BaseRichSpout {
     SpoutOutputCollector spoutOutputCollector;
 
-    protected File[] files;
+    protected File file = new File("/home/luan/Documents/repositorio/WordCountStorm/src/main/data/books.dat");
     protected Scanner scanner;
     protected int curFileIndex = 0;
     protected int curLineIndex = 0;
@@ -27,20 +27,21 @@ public class BookSpout extends BaseRichSpout {
 
     @Override
     public void open(Map<String, Object> conf, TopologyContext context, SpoutOutputCollector collector) {
-        this.spoutOutputCollector = spoutOutputCollector;
+        this.spoutOutputCollector = collector;
     }
 
     @Override
     public void nextTuple() {
-        File file = new File("/home/luan/Documents/repositorio/WordcountStorm/src/main/data/books.dat");
-        try {
-            scanner = new Scanner(file);
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+
+        if (scanner == null) {
+            try {
+                scanner = new Scanner(file);
+            } catch (FileNotFoundException e) {
+                throw new RuntimeException(e);
+            }
         }
-        String teste = scanner.nextLine();
         if (scanner.hasNextLine()) {
-            spoutOutputCollector.emit(new Values(teste));
+            spoutOutputCollector.emit(new Values(scanner.nextLine()));
         }
     }
 
