@@ -13,13 +13,17 @@ import org.apache.storm.tuple.Tuple;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
 public class FileSink extends BaseRichBolt {
+    protected long lastTime;
+    protected long count = 0;
     private HashMap<String, Integer> counts = null;
 
     @Override
@@ -37,6 +41,7 @@ public class FileSink extends BaseRichBolt {
         String word = input.getStringByField("word");
         Integer count = input.getIntegerByField("count");
         counts.put(word, count);
+        calculateThroughput(Instant.now().getEpochSecond());
     }
 
     @Override
@@ -51,5 +56,22 @@ public class FileSink extends BaseRichBolt {
                 throw new RuntimeException(e);
             }
         });
+    }
+
+    public void calculateThroughput(long unixTime) {
+        if (this.lastTime == 0)
+            this.lastTime = unixTime;
+
+        if (this.lastTime == unixTime) {
+            count++;
+        } else {
+            try (PrintWriter pw = new PrintWriter(new FileWriter("/home/luan/Documents/repositorio/WordCountStorm/src/main/data/Throughput/" + this.getClass().getSimpleName() + ".csv", true), true)) {
+                pw.println(lastTime + "," + count);
+                this.count = 1;
+                this.lastTime = unixTime;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }

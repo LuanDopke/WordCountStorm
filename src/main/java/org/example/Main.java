@@ -28,6 +28,7 @@ public class Main {
             throw new RuntimeException(e);
         } finally {
             cluster.shutdown();
+            System.runFinalization();
         }
 
     }
